@@ -1,0 +1,19 @@
+{
+  "name": "esp32-gif-scraper",
+  "version": "1.0.0",
+  "description": "Scrapes GIFs from GIPHY and saves URLs to a Gist for ESP32 display",
+  "main": "scraper.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "scrape": "node scraper.js",
+    "test:local": "node test-local.js"
+  },
+  "keywords": ["giphy", "gist", "esp32", "gif"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
