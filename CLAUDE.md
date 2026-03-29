@@ -53,6 +53,7 @@ updateGist()    [PATCH request to GitHub API]
 - `MAX_SIZE_BYTES` — Max file size in bytes (default: 100KB)
 - `MAX_WIDTH` / `MAX_HEIGHT` — Dimension limits in pixels (default: 200×200)
 - `FETCH_LIMIT` — Results per tag from GIPHY (default: 50)
+- `MAX_OFFSET` — Upper bound for random GIPHY search offset; higher = more variety, lower = safer for niche tags (default: 100)
 - `REQUEST_TIMEOUT` — HTTP timeout in ms (default: 10000)
 - `CONCURRENCY` — Parallel HEAD requests per batch (default: 10)
 
@@ -195,6 +196,7 @@ npm run test:local
 - `MAX_HEIGHT`
 - `CONCURRENCY`
 - `REQUEST_TIMEOUT`
+- `MAX_OFFSET`
 
 ---
 
