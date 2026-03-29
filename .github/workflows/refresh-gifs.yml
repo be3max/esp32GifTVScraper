@@ -25,5 +25,5 @@ jobs:
         env:
           GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
           GIST_ID: ${{ secrets.GIST_ID }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: node scraper.js

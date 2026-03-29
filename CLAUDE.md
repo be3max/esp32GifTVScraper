@@ -45,7 +45,7 @@ updateGist()    [PATCH request to GitHub API]
 **Required** (validated at startup):
 - `GIPHY_API_KEY` — GIPHY developer API key
 - `GIST_ID` — GitHub Gist ID
-- `GITHUB_TOKEN` — GitHub token with `gist` permission
+- `GH_TOKEN` — GitHub token with `gist` permission
 
 **Optional** (overrides defaults in `lib/config.js`):
 - `TAGS` — Comma-separated tag list (default: 21 retro/pixel art tags)
@@ -74,7 +74,7 @@ Then edit `.env` with a text editor and add your three required values:
 ```
 GIPHY_API_KEY=your_giphy_api_key_here
 GIST_ID=your_gist_id_here
-GITHUB_TOKEN=your_github_token_here
+GH_TOKEN=your_github_token_here
 ```
 
 **Where to get each value:**
@@ -90,7 +90,7 @@ GITHUB_TOKEN=your_github_token_here
 - Copy the ID from the URL: `https://gist.github.com/USERNAME/**GIST_ID**`
 - Paste into `.env`
 
-**GITHUB_TOKEN:**
+**GH_TOKEN:**
 - Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
 - Click "Generate new token"
 - Give it a name: `ESP32 GIF Scraper`
@@ -144,7 +144,7 @@ Go to your repo → Settings → Secrets and variables → Actions
 Add these **repository secrets**:
 - **GIPHY_API_KEY** — Your API key from developers.giphy.com
 - **GIST_ID** — Your Gist ID
-- (GITHUB_TOKEN is auto-provided by GitHub Actions)
+- (GH_TOKEN is auto-provided by GitHub Actions)
 
 **3. Test the workflow:**
 - Go to repo → Actions tab

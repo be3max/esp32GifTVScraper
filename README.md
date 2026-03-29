@@ -13,7 +13,7 @@ cp .env.example .env
 # Edit .env and fill in your three values:
 #   - GIPHY_API_KEY
 #   - GIST_ID
-#   - GITHUB_TOKEN
+#   - GH_TOKEN
 
 # Test locally
 npm run test:local
@@ -204,7 +204,7 @@ Edit `.env` in your editor and fill in your credentials:
 ```
 GIPHY_API_KEY=your_giphy_api_key_here
 GIST_ID=your_gist_id_here
-GITHUB_TOKEN=your_github_token_here
+GH_TOKEN=your_github_token_here
 ```
 
 **How to get each value:**
@@ -221,7 +221,7 @@ GITHUB_TOKEN=your_github_token_here
 - Copy the ID from the URL: `https://gist.github.com/USERNAME/**GIST_ID**`
 - Paste it into `.env`
 
-**GITHUB_TOKEN:**
+**GH_TOKEN:**
 - Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
 - Click "Generate new token"
 - Name: `ESP32 GIF Scraper`
@@ -267,10 +267,10 @@ npm run scrape
 This runs without dotenv, so environment variables must be set directly:
 ```bash
 # PowerShell
-$env:GIPHY_API_KEY = "..."; $env:GIST_ID = "..."; $env:GITHUB_TOKEN = "..."; npm run scrape
+$env:GIPHY_API_KEY = "..."; $env:GIST_ID = "..."; $env:GH_TOKEN = "..."; npm run scrape
 
 # Bash/macOS/Linux
-export GIPHY_API_KEY="..." GIST_ID="..." GITHUB_TOKEN="..." && npm run scrape
+export GIPHY_API_KEY="..." GIST_ID="..." GH_TOKEN="..." && npm run scrape
 ```
 
 ## Troubleshooting
@@ -288,7 +288,7 @@ Must contain:
 ```
 GIPHY_API_KEY=your_key
 GIST_ID=your_id
-GITHUB_TOKEN=your_token
+GH_TOKEN=your_token
 ```
 
 All three are **required**. If any are missing or empty, add them.
