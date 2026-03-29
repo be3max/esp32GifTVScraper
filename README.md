@@ -79,15 +79,19 @@ After a few seconds, your Gist should have 50 GIF URLs (one per line).
 
 ### Filtering Process
 ```
-Query GIPHY → Fetch 50 GIFs per tag
+Query GIPHY → Fetch 50 GIFs per tag (tags shuffled for variety)
+                    ↓
+            Read previous Gist URLs (parallel with fetch)
                     ↓
             Check dimensions (200×200px max)
                     ↓
             Check file size (100KB max)
                     ↓
-            Collect 50 valid GIFs
+            Collect 100 valid GIF candidates (2× buffer)
                     ↓
-            Update GitHub Gist
+            Shuffle + pick fresh GIFs first, reuse as fallback
+                    ↓
+            Select 50 GIFs → Update GitHub Gist
 ```
 
 ### Output Format
@@ -240,8 +244,9 @@ Fetching GIFs for 21 tags in parallel...
 Fetched 250 unique GIFs
 
 Filtering 250 GIFs by constraints: max 200×200px, max 100KB
-Found 50 valid GIFs
+Found 100 valid GIFs
 
+Selected 50 fresh + 0 reused GIFs
 Uploading 50 URLs to Gist...
 ✓ Updated Gist with 50 URLs
 

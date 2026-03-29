@@ -31,9 +31,11 @@ test-local.js      Local test runner: loads .env via dotenv, runs scraper
 ```
 loadConfig()
   ↓
-fetchAllTags()  [parallel, deduplicates by GIF ID]
+fetchAllTags() + readGist()  [parallel: fetch new GIFs + read previous URLs]
   ↓
-filterBySize()  [batched parallel HEAD requests on rendition.url]
+filterBySize()  [batched parallel HEAD requests on rendition.url, collects 2× candidates]
+  ↓
+shuffle() + fresh-first selection  [prioritize GIFs not seen last run]
   ↓
 updateGist()    [PATCH request to GitHub API]
 ```
@@ -111,8 +113,9 @@ Fetching GIFs for 21 tags in parallel...
 Fetched 250 unique GIFs
 
 Filtering 250 GIFs by constraints: max 200×200px, max 100KB
-Found 50 valid GIFs
+Found 100 valid GIFs
 
+Selected 50 fresh + 0 reused GIFs
 Uploading 50 URLs to Gist...
 ✓ Updated Gist with 50 URLs
 
@@ -223,18 +226,20 @@ cat lib/config.js  # See DEFAULT_TAGS and default env vars
 |------|---------|-------|
 | `lib/config.js` | Config validation + typed object | ~50 |
 | `lib/http.js` | HTTP client with error handling | ~100 |
-| `lib/giphy.js` | GIPHY API + parallel fetching | ~120 |
-| `lib/gist.js` | GitHub Gist update | ~40 |
-| `scraper.js` | Orchestration | ~40 |
+| `lib/giphy.js` | GIPHY API + parallel fetching + shuffle | ~170 |
+| `lib/gist.js` | GitHub Gist read/update | ~80 |
+| `scraper.js` | Orchestration | ~55 |
 | `test-local.js` | Test runner | 3 |
 
-## Critical Bug Fixes
+## Key Features
 
-1. **Size check now uses rendition.url** (CDN link) instead of gif.url (HTML page)
-2. **HTTP status codes are checked** — errors are no longer silently ignored
-3. **Unknown-size GIFs are logged** — visibility into filter failures
-4. **GIFs deduplicated across tags** — no duplicates in output
-5. **Request timeouts** — prevents hanging on slow connections
+1. **Fresh GIF prioritization** — reads previous Gist, shuffles candidates, fills with fresh GIFs first, reused as fallback
+2. **2× candidate buffer** — `filterBySize` collects `targetCount * 2` valid GIFs to give the fresh-first selector room to work
+3. **Tag order shuffled** — `fetchAllTags` shuffles tags each run for variety
+4. **Size check uses rendition.url** (CDN link) instead of gif.url (HTML page)
+5. **HTTP status codes are checked** — errors are no longer silently ignored
+6. **GIFs deduplicated across tags** — no duplicates in output
+7. **Request timeouts** — prevents hanging on slow connections
 
 ## Performance
 
@@ -336,19 +341,22 @@ if (response.statusCode === 200) {
 
 ---
 
-### `lib/giphy.js` (~120 lines)
-**Purpose**: GIPHY API client with parallel fetching
+### `lib/giphy.js` (~170 lines)
+**Purpose**: GIPHY API client with parallel fetching and shuffle utilities
 
 **Exports**:
 - `searchTag(tag, config)` — Search single tag
-- `fetchAllTags(config)` — Fetch all tags in parallel, deduplicate by GIF ID
-- `filterBySize(gifs, config)` — Filter by dimensions + file size (batched parallel HEAD requests)
+- `fetchAllTags(config)` — Fetch all tags in parallel (shuffled order), deduplicate by GIF ID
+- `filterBySize(gifs, config, limit)` — Filter by dimensions + file size (batched parallel HEAD requests); stops early once `limit` valid GIFs found
 - `getGifSize(url, timeout)` — Check GIF file size via HEAD request
+- `shuffle(array)` — Fisher-Yates shuffle, returns new array
 
 **Features**:
+- ✓ Tag order shuffled each run for variety
 - ✓ Parallel tag fetching (21 serial → parallel)
 - ✓ Deduplication by GIF ID (prevents duplicates)
 - ✓ Batched HEAD requests (1,050 sequential → 100+ parallel batches)
+- ✓ Early exit once `limit` valid GIFs collected (default: `targetCount * 2`)
 - ✓ Dimension filtering (max width/height)
 - ✓ Size filtering (max file size in bytes)
 
@@ -356,21 +364,23 @@ if (response.statusCode === 200) {
 
 **Example**:
 ```js
-const { fetchAllTags, filterBySize } = require('./lib/giphy');
-const allGifs = await fetchAllTags(config); // All tags, parallel
-const valid = await filterBySize(allGifs, config); // Filtered + sized
+const { fetchAllTags, filterBySize, shuffle } = require('./lib/giphy');
+const allGifs = await fetchAllTags(config);           // All tags, parallel, shuffled
+const valid = await filterBySize(allGifs, config, 100); // Up to 100 valid GIFs
 ```
 
 ---
 
-### `lib/gist.js` (~40 lines)
-**Purpose**: GitHub Gist API client
+### `lib/gist.js` (~80 lines)
+**Purpose**: GitHub Gist API client (read + write)
 
 **Exports**:
 - `updateGist(config, urls)` — Update Gist file with newline-separated URLs
+- `readGist(config)` — Read current URLs from Gist; returns `[]` on failure
 
 **Features**:
 - ✓ PATCH request to GitHub API
+- ✓ GET request to read existing URLs (for fresh-first deduplication)
 - ✓ Descriptive error messages for auth/not-found errors
 - ✓ Writes to configurable filename (default: `gif-urls.txt`)
 
@@ -378,25 +388,27 @@ const valid = await filterBySize(allGifs, config); // Filtered + sized
 
 **Example**:
 ```js
-const { updateGist } = require('./lib/gist');
+const { updateGist, readGist } = require('./lib/gist');
+const previousUrls = await readGist(config);  // ['https://...', ...]
 await updateGist(config, ['https://...', 'https://...']);
-// Gist now has these URLs, one per line
 ```
 
 ---
 
-### `scraper.js` (~40 lines)
+### `scraper.js` (~55 lines)
 **Purpose**: Orchestration — glues modules together
 
 **Flow**:
 ```
 loadConfig()
   ↓
-fetchAllTags()  → 250 GIFs from all tags
+fetchAllTags() + readGist()  → 250 GIFs + previous URLs (parallel)
   ↓
-filterBySize()  → 50 valid GIFs
+filterBySize(…, targetCount * 2)  → up to 100 valid GIF candidates
   ↓
-updateGist()    → Gist updated
+shuffle() + fresh-first selection  → 50 GIFs, fresh ones first
+  ↓
+updateGist()  → Gist updated
 ```
 
 **Why it's short**: All heavy lifting is in `lib/`
