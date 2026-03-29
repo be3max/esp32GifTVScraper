@@ -26,8 +26,6 @@ jobs:
           GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
           GIST_ID: ${{ secrets.GIST_ID }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          CONCURRENCY: ${{ vars.CONCURRENCY }}
-          TARGET_COUNT: ${{ vars.TARGET_COUNT }}
           TAGS: ${{ vars.TAGS }}
           FETCH_LIMIT: ${{ vars.FETCH_LIMIT }}
           TARGET_COUNT: ${{ vars.TARGET_COUNT }}
