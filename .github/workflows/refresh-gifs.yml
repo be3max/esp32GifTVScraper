@@ -2,8 +2,8 @@ name: Refresh GIF URLs
 
 on:
   schedule:
-    # Run weekly on Sunday at 2 AM UTC
-    - cron: '0 2 * * 0'
+    # Run every 12 hours (0:00 and 12:00 UTC)
+    - cron: '0 */12 * * *'
   workflow_dispatch:
 
 jobs:
