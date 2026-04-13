@@ -1,6 +1,6 @@
 # ESP32 GIF Scraper 🎬
 
-Automatically fetch pixel art and retro GIFs from GIPHY and store them in a GitHub Gist. Perfect for an [https://github.com/be3max/esp32GifTV](ESP32 screensaver) that displays random animated GIFs.
+Automatically fetch pixel art and retro GIFs from GIPHY and store them in a GitHub Gist. Perfect for an (https://github.com/be3max/esp32GifTV)[ESP32 screensaver] that displays random animated GIFs.
 
 ## Quick Reference
 
