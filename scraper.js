@@ -29,11 +29,14 @@ async function main() {
     // Prefer GIFs not seen in the previous run
     const previousSet = new Set(previousUrls);
     const shuffledValid = shuffle(validGifs);
-    const freshGifs = shuffledValid.filter(g => !previousSet.has(g.url));
-    const seenGifs  = shuffledValid.filter(g =>  previousSet.has(g.url));
-    const selected  = [...freshGifs, ...seenGifs].slice(0, config.targetCount);
+    const freshGifs = [];
+    const seenGifs = [];
+    for (const g of shuffledValid) {
+      (previousSet.has(g.url) ? seenGifs : freshGifs).push(g);
+    }
+    const selected = [...freshGifs, ...seenGifs].slice(0, config.targetCount);
 
-    const freshCount = Math.min(freshGifs.length, config.targetCount);
+    const freshCount = Math.min(freshGifs.length, selected.length);
     const reusedCount = selected.length - freshCount;
     console.log(`Selected ${freshCount} fresh + ${reusedCount} reused GIFs`);
 
